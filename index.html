@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --bg-color: #050505;
@@ -80,11 +81,12 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
         section {
-            padding: 80px 0;
+            padding: 50px 0;
             position: relative;
         }
 
@@ -137,7 +139,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            margin-top: 50px;
+            margin-top: 25px;
         }
 
         .card {
@@ -174,6 +176,62 @@
             transform: scaleX(1);
         }
 
+        .card:hover::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 240, 255, 0.05), transparent);
+            transform: rotate(45deg);
+            animation: scan 3s infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -100%; left: -100%; }
+            100% { top: 100%; left: 100%; }
+        }
+
+        /* --- LIVE EQUITY BAR --- */
+        .equity-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--cyan);
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .equity-value {
+            color: var(--cyan);
+            font-weight: bold;
+        }
+
+        .equity-progress {
+            width: 100px;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .equity-fill {
+            height: 100%;
+            background: var(--cyan);
+            width: 0%;
+            transition: width 0.5s;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
         .card h3 {
             margin-bottom: 15px;
             font-size: 1.4rem;
@@ -208,7 +266,7 @@
             color: #00ff41;
             box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
             max-width: 800px;
-            margin: 40px auto;
+            margin: 20px auto;
             position: relative;
         }
 
@@ -252,8 +310,16 @@
 
         /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2rem; }
-            .grid-container { grid-template-columns: 1fr; }
+            section { padding: 30px 0; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .grid-container { 
+                grid-template-columns: 1fr; 
+                gap: 20px;
+                margin-top: 20px;
+            }
+            .grid-container:first-child { margin-top: 0; }
+            .terminal-window { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -263,6 +329,13 @@
     <canvas id="canvas-bg"></canvas>
     <!-- Floating Currencies Container -->
     <div id="currency-container"></div>
+
+    <!-- Live Equity Widget -->
+    <div class="equity-bar">
+        <span>AI EQUITY GROWTH:</span>
+        <span class="equity-value">+$<span id="equity-val">1204.50</span></span>
+        <div class="equity-progress"><div class="equity-fill" id="equity-fill"></div></div>
+    </div>
 
     <!-- HERO SECTION -->
     <section class="hero">
@@ -290,7 +363,7 @@
         <h2 style="text-align: center; margin-bottom: 10px;">Технологическое <span class="gradient-text">Превосходство</span></h2>
         <div class="grid-container">
             <div class="card">
-                <h3>🧠 Dueling DQN</h3>
+                <h3><i class="fa-solid fa-brain" style="color:var(--gold); margin-right:12px;"></i>Dueling DQN</h3>
                 <ul>
                     <li>Разделение оценки ситуации (State Value) и выгоды (Advantage).</li>
                     <li>Понимает, когда переждать, а когда войти.</li>
@@ -298,7 +371,7 @@
                 </ul>
             </div>
             <div class="card">
-                <h3>⏳ LSTM Память</h3>
+                <h3><i class="fa-solid fa-microchip" style="color:var(--gold); margin-right:12px;"></i>LSTM Память</h3>
                 <ul>
                     <li>Помнит историю предыдущих движений.</li>
                     <li>Видит контекст: тренд, флэт, накопление.</li>
@@ -306,7 +379,7 @@
                 </ul>
             </div>
             <div class="card">
-                <h3>📈 Persistent Learning</h3>
+                <h3><i class="fa-solid fa-chart-line" style="color:var(--gold); margin-right:12px;"></i>Persistent Learning</h3>
                 <ul>
                     <li>Обучение не сбрасывается при перезагрузке.</li>
                     <li>Сохранение состояний оптимизатора (Adam moments).</li>
@@ -316,16 +389,56 @@
         </div>
     </section>
 
+    <!-- COMPARISON SECTION -->
+    <section class="container hidden">
+        <h2 style="text-align: center; margin-bottom: 30px;">Почему <span class="cyan-text">AI</span>, а не классика?</h2>
+        <div class="card" style="padding: 0; overflow: hidden; border-color: rgba(0, 240, 255, 0.2);">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; color: var(--text-sec); min-width: 600px;">
+                    <thead>
+                        <tr style="background: rgba(212, 175, 55, 0.1); color: #fff;">
+                            <th style="padding: 20px;">Параметр</th>
+                            <th style="padding: 20px;">Classic Ilan</th>
+                            <th style="padding: 20px;" class="cyan-text">Ilan AI Pro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px 20px; color: #fff;">Сетка (Grid)</td>
+                            <td style="padding: 15px 20px;">Фиксированный шаг</td>
+                            <td style="padding: 15px 20px; color: var(--cyan);">Адаптивная (Volatility-based)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px 20px; color: #fff;">Вход в рынок</td>
+                            <td style="padding: 15px 20px;">По сигналу индикатора</td>
+                            <td style="padding: 15px 20px; color: var(--cyan);">Deep Learning фильтрация</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 15px 20px; color: #fff;">Риск-менеджмент</td>
+                            <td style="padding: 15px 20px;">Мартингейл (умножение)</td>
+                            <td style="padding: 15px 20px; color: var(--cyan);">Критерий Келли + Dynamic Lot</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 15px 20px; color: #fff;">Логика выхода</td>
+                            <td style="padding: 15px 20px;">Фиксированный профит</td>
+                            <td style="padding: 15px 20px; color: var(--cyan);">AI-прогноз цели (Take Profit)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <!-- EXECUTION & RISK -->
     <section class="container hidden">
         <div class="grid-container">
             <div class="card">
-                <h3>⚡ Гибридное Исполнение</h3>
+                <h3><i class="fa-solid fa-bolt-lightning" style="color:var(--gold); margin-right:12px;"></i>Гибридное Исполнение</h3>
                 <p style="color:var(--text-sec); margin-bottom:10px;"><strong>Strategic Bar Analysis (M1):</strong> Вход по закрытию бара для защиты от шума.</p>
                 <p style="color:var(--text-sec);"><strong>High-Speed Tick Exit:</strong> Мгновенная фиксация профита на тиках.</p>
             </div>
             <div class="card">
-                <h3>🛡️ Управление Рисками</h3>
+                <h3><i class="fa-solid fa-shield-halved" style="color:var(--gold); margin-right:12px;"></i>Управление Рисками</h3>
                 <ul>
                     <li><strong>VaR & Kelly Criterion:</strong> Математический расчет лота.</li>
                     <li><strong>Multi-Symbol Hedging:</strong> Корреляция EURUSD / AUDUSD.</li>
@@ -357,10 +470,10 @@
     </section>
 
     <!-- REQUIREMENTS -->
-    <section class="container hidden" style="margin-bottom: 50px;">
+    <section class="container hidden">
         <div class="card" style="border-left: 4px solid var(--cyan);">
-            <h3>🛠 Технические Требования</h3>
-            <div class="grid-container" style="margin-top: 20px; grid-template-columns: 1fr 1fr;">
+            <h3><i class="fa-solid fa-gears" style="color:var(--cyan); margin-right:12px;"></i>Технические Требования</h3>
+            <div class="grid-container" style="margin-top: 20px;">
                 <ul>
                     <li><strong>Платформа:</strong> MetaTrader 5 (Hedge)</li>
                     <li><strong>Пары:</strong> EURUSD, AUDUSD</li>
@@ -375,11 +488,57 @@
 
     <!-- FOOTER -->
     <footer id="contact">
-        <p>© 2023 Ilan AI Pro Development. All Rights Reserved.</p>
-        <p style="margin-top: 10px; color: var(--gold);">Contact for License: your_email@example.com</p>
+        <p>© <span id="current-year"></span> Ilan AI Pro Development. All Rights Reserved.</p>
+        <p style="margin-top: 10px; color: var(--gold);">Contact for License: <a href="https://t.me/karas572" style="color: var(--cyan); text-decoration: none; text-shadow: 0 0 5px var(--cyan);">@karas572</a></p>
     </footer>
 
     <script>
+        // --- 0. SET CURRENT YEAR ---
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // --- 0.1 LIVE LOG ANIMATION ---
+        const logCont = document.getElementById('log-content');
+        const msgs = [
+            "[MARKET] EURUSD: volatility scan...",
+            "[MARKET] Trend detected (AUDUSD H1)",
+            "[TRAINER] Step: 15682 | Eps: 0.04 | Loss: 0.00032",
+            "[ACTION] Buy order: 0.02 lot (AI confirmation)",
+            "[SYSTEM] Memory buffer optimization: 94%",
+            "[TRAINER] Network re-optimization: COMPLETE",
+            "[ACTION] TP updated for basket: +15.5 pips",
+            "[MARKET] Volatility spike (M1 context)",
+            "[ACTION] Grid step: adaptive (22.5 pts)",
+            "[SYSTEM] ADAM moments saved to persistent storage"
+        ];
+        let lines = [
+            "[SYSTEM] Initializing Neural Core...",
+            "[LOADER] Model: Dueling_DQN_v5_LSTM.pt",
+            "[TRAINER] Шаг: 15600 | Logic: LOADED | Eps: 0.05",
+            "[MARKET] EURUSD Volatility: HIGH | Regime: TREND",
+            "[ACTION] Open Buy 0.01 | SL: Dynamic | TP: AI_Calc"
+        ];
+        function updateLog() {
+            const m = msgs[Math.floor(Math.random()*msgs.length)];
+            lines.push(m);
+            if(lines.length > 6) lines.shift();
+            logCont.innerHTML = lines.join('<br>') + '<br><span class="blink">_</span>';
+        }
+        setInterval(updateLog, 3000);
+
+        // --- 0.2 EQUITY GROWTH WIDGET ---
+        let currentEquity = 1204.50;
+        let equityFill = 65;
+        const equityEl = document.getElementById('equity-val');
+        const fillEl = document.getElementById('equity-fill');
+        
+        function updateEquity() {
+            currentEquity += Math.random() * 0.5;
+            equityFill = (equityFill + 0.1) % 100;
+            equityEl.textContent = currentEquity.toFixed(2);
+            fillEl.style.width = equityFill + '%';
+        }
+        setInterval(updateEquity, 2000);
+
         // --- 1. SCROLL ANIMATION ---
         const observer = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
