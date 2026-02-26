@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilan AI Pro | Deep Reinforcement Learning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: rgba(20, 20, 25, 0.6);
+            --gold: #D4AF37;
+            --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #FEE186 50%, #D4AF37 100%);
+            --cyan: #00F0FF;
+            --text-main: #ffffff;
+            --text-sec: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- BACKGROUND ANIMATION --- */
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+        }
+
+        .currency-float {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.05);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            user-select: none;
+            animation: floatUp 15s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.5; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- TYPOGRAPHY & UTILS --- */
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .gradient-text {
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cyan-text {
+            color: var(--cyan);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+            position: relative;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            animation: glow 3s infinite alternate;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-sec);
+            max-width: 700px;
+            margin-bottom: 40px;
+        }
+
+        .btn-premium {
+            padding: 15px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000;
+            background: var(--gold-gradient);
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: 0.3s;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .btn-premium:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.7);
+        }
+
+        /* --- CARDS GRID --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gold-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(212, 175, 55, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card h3 {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            color: var(--gold);
+        }
+
+        .card ul {
+            list-style: none;
+            color: var(--text-sec);
+        }
+
+        .card ul li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .card ul li::before {
+            content: '▹';
+            color: var(--cyan);
+            position: absolute;
+            left: 0;
+        }
+
+        /* --- TERMINAL LOG --- */
+        .terminal-window {
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            max-width: 800px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .terminal-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            color: #666;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            color: var(--text-sec);
+            font-size: 0.9rem;
+        }
+
+        /* --- ANIMATIONS ON SCROLL --- */
+        .hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Canvas for AI Network -->
+    <canvas id="canvas-bg"></canvas>
+    <!-- Floating Currencies Container -->
+    <div id="currency-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="container hidden">
+            <h3 class="cyan-text">NeuralQuant Agent v5</h3>
+            <h1 class="gradient-text">Ilan AI Pro</h1>
+            <p>Deep Reinforcement Learning Grid System. <br>Эволюция классики с искусственным интеллектом.</p>
+            <a href="#contact" class="btn-premium">ПОЛУЧИТЬ ДОСТУП</a>
+        </div>
+    </section>
+
+    <!-- USP SECTION -->
+    <section class="container hidden">
+        <div class="card" style="text-align: center; border-color: var(--gold);">
+            <h2 style="color: #fff; margin-bottom: 20px;">Уникальное Торговое Предложение</h2>
+            <p style="font-size: 1.1rem; color: #ddd;">
+                «Забудьте о фиксированных настройках. Этот советник использует <span class="cyan-text">Deep Reinforcement Learning</span>, 
+                чтобы адаптировать шаг сетки и лотность под волатильность. Он не просто торгует — он <span class="gradient-text">эволюционирует</span>.»
+            </p>
+        </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="container hidden">
+        <h2 style="text-align: center; margin-bottom: 10px;">Технологическое <span class="gradient-text">Превосходство</span></h2>
+        <div class="grid-container">
+            <div class="card">
+                <h3>🧠 Dueling DQN</h3>
+                <ul>
+                    <li>Разделение оценки ситуации (State Value) и выгоды (Advantage).</li>
+                    <li>Понимает, когда переждать, а когда войти.</li>
+                    <li>Минимизация ложных срабатываний.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>⏳ LSTM Память</h3>
+                <ul>
+                    <li>Помнит историю предыдущих движений.</li>
+                    <li>Видит контекст: тренд, флэт, накопление.</li>
+                    <li>Анализ не только цены, но и времени.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>📈 Persistent Learning</h3>
+                <ul>
+                    <li>Обучение не сбрасывается при перезагрузке.</li>
+                    <li>Сохранение состояний оптимизатора (Adam moments).</li>
+                    <li>Бот умнеет с каждым днем работы.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXECUTION & RISK -->
+    <section class="container hidden">
+        <div class="grid-container">
+            <div class="card">
+                <h3>⚡ Гибридное Исполнение</h3>
+                <p style="color:var(--text-sec); margin-bottom:10px;"><strong>Strategic Bar Analysis (M1):</strong> Вход по закрытию бара для защиты от шума.</p>
+                <p style="color:var(--text-sec);"><strong>High-Speed Tick Exit:</strong> Мгновенная фиксация профита на тиках.</p>
+            </div>
+            <div class="card">
+                <h3>🛡️ Управление Рисками</h3>
+                <ul>
+                    <li><strong>VaR & Kelly Criterion:</strong> Математический расчет лота.</li>
+                    <li><strong>Multi-Symbol Hedging:</strong> Корреляция EURUSD / AUDUSD.</li>
+                    <li><strong>Dynamic Drawdown:</strong> Контроль эквити в реальном времени.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROOF SECTION -->
+    <section class="container hidden">
+        <h2 style="text-align: center;">Доказательство <span class="cyan-text">Интеллекта</span></h2>
+        <p style="text-align: center; color: var(--text-sec); margin-bottom: 20px;">Живой лог обучения нейросети в реальном времени</p>
+        
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span>root@ilan-ai:~/logs</span>
+                <span>● LIVE</span>
+            </div>
+            <div id="log-content">
+                [SYSTEM] Initializing Neural Core...<br>
+                [LOADER] Model: Dueling_DQN_v5_LSTM.pt<br>
+                [TRAINER] Шаг: 15600 | Logic: LOADED | Eps: 0.05 | Loss: 0.0004<br>
+                [MARKET] EURUSD Volatility: HIGH | Regime: TREND<br>
+                [ACTION] Open Buy 0.01 | SL: Dynamic | TP: AI_Calc<br>
+                <span class="blink">_</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- REQUIREMENTS -->
+    <section class="container hidden" style="margin-bottom: 50px;">
+        <div class="card" style="border-left: 4px solid var(--cyan);">
+            <h3>🛠 Технические Требования</h3>
+            <div class="grid-container" style="margin-top: 20px; grid-template-columns: 1fr 1fr;">
+                <ul>
+                    <li><strong>Платформа:</strong> MetaTrader 5 (Hedge)</li>
+                    <li><strong>Пары:</strong> EURUSD, AUDUSD</li>
+                </ul>
+                <ul>
+                    <li><strong>Таймфрейм:</strong> M1 (Entry) + H1 (Context)</li>
+                    <li><strong>Депозит:</strong> от $500 (Cent) / $5000 (Std)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact">
+        <p>© 2023 Ilan AI Pro Development. All Rights Reserved.</p>
+        <p style="margin-top: 10px; color: var(--gold);">Contact for License: your_email@example.com</p>
+    </footer>
+
+    <script>
+        // --- 1. SCROLL ANIMATION ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        });
+
+        const hiddenElements = document.querySelectorAll('.hidden');
+        hiddenElements.forEach((el) => observer.observe(el));
+
+        // --- 2. CANVAS BACKGROUND (AI NETWORK) ---
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = (Math.random() * 1) - 0.5;
+                this.speedY = (Math.random() * 1) - 0.5;
+                this.color = '#00F0FF';
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 15000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                // Draw connections
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        // --- 3. FLOATING CURRENCY ICONS ---
+        const symbols = ['$', '€', '£', '¥', '₿', '📈', '📉'];
+        const currencyContainer = document.getElementById('currency-container');
+
+        function createFloatingSymbol() {
+            const el = document.createElement('div');
+            el.classList.add('currency-float');
+            el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            currencyContainer.appendChild(el);
+
+            setTimeout(() => {
+                el.remove();
+            }, 20000);
+        }
+
+        setInterval(createFloatingSymbol, 500);
+
+    </script>
+</body>
+</html>
